@@ -1,58 +1,73 @@
-// pages/index.tsx
+import { useEffect, useState } from 'react'
 import AdminLayout from '../components/layout/AdminLayout'
 import Card from '../components/cards/Card'
 import Button from '../components/buttons/Button'
-import { useState } from 'react'
 import { useRouter } from 'next/router'
 
 type Event = {
     id: number
     title: string
+    description: string
     date: string
     location: string
-    ageLimit: string
+    address: string
+    ageLimit: number
+    minPrice: number
+    status: string
 }
 
 export default function HomePage() {
-    const router = useRouter() // ← добавляем сюда
-    const [events, setEvents] = useState<Event[]>([
-        { id: 1, title: 'Концерт', date: '2025-12-20 19:00', location: 'Клуб «Муза»', ageLimit: '18+' },
-        { id: 2, title: 'Выставка', date: '2025-12-25 10:00', location: 'Галерея Арт', ageLimit: '6+' },
-    ])
+    const router = useRouter()
+    const [events, setEvents] = useState<Event[]>([])
+    const [loading, setLoading] = useState(true)
 
-    const handleDelete = (id: number) => {
-        if (confirm('Удалить мероприятие?')) {
-            setEvents(events.filter(e => e.id !== id))
-        }
-    }
+    // Загружаем события с API
+    useEffect(() => {
+        fetch('/api/events')
+            .then(res => res.json())
+            .then(data => {
+                setEvents(data)
+                setLoading(false)
+            })
+    }, [])
+
+    if (loading) return <AdminLayout><p>Загрузка...</p></AdminLayout>
 
     return (
         <AdminLayout>
-            <h1 className="text-2xl font-bold mb-6">Мероприятия</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {events.map(event => (
-                    <Card key={event.id}>
-                        <h2 className="text-xl font-semibold">{event.title}</h2>
-                        <p className="text-gray-600">{event.date}</p>
-                        <p className="text-gray-600">{event.location}</p>
-                        <p className="text-gray-600">Возраст: {event.ageLimit}</p>
-                        <div className="mt-4 flex gap-2">
-                            <Button
-                                className="bg-yellow-500 text-white"
-                                onClick={() => router.push(`/events/${event.id}`)} // ← теперь router доступен
-                            >
-                                Редактировать
-                            </Button>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Список мероприятий</h1>
+                <Button className="bg-green-600 text-white" onClick={() => router.push('/events/create')}>
+                    Создать новое
+                </Button>
+            </div>
+
+            {events.length === 0 && <p>Мероприятия не найдены</p>}
+
+            {events.map(event => (
+                <Card key={event.id} className="mb-4">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h2 className="font-semibold text-lg">{event.title}</h2>
+                            <p>{new Date(event.date).toLocaleString()}</p>
+                            <p>{event.location}</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button onClick={() => router.push(`/events/${event.id}`)}>Редактировать</Button>
                             <Button
                                 className="bg-red-600 text-white"
-                                onClick={() => handleDelete(event.id)}
+                                onClick={async () => {
+                                    if (!confirm('Удалить мероприятие?')) return
+                                    await fetch(`/api/events/${event.id}`, { method: 'DELETE' })
+                                    setEvents(prev => prev.filter(e => e.id !== event.id))
+                                }}
                             >
                                 Удалить
                             </Button>
                         </div>
-                    </Card>
-                ))}
-            </div>
+                    </div>
+                </Card>
+            ))}
         </AdminLayout>
     )
 }
