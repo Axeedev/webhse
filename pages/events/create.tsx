@@ -23,18 +23,27 @@ export default function CreateEventPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
+        if (!date) {
+            alert('Выберите дату и время')
+            return
+        }
+
+        // Преобразуем дату в ISO 8601 для корректного хранения и форматирования
+        const normalizedDate = date.includes('T') ? date : date + 'T00:00'
+
         await fetch('/api/events', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 title,
                 description,
-                date,
+                datetime: normalizedDate, // серверное поле для даты
                 location,
                 address,
                 ageLimit: Number(ageLimit),
                 minPrice: Number(minPrice),
-                url: url
+                poster_url: url,           // серверное поле для изображения
+                status
             }),
         })
 
@@ -50,10 +59,20 @@ export default function CreateEventPage() {
                     <Input label="Название" value={title} onChange={e => setTitle(e.target.value)} />
                     <Input label="Url изображения" value={url} onChange={e => setUrl(e.target.value)} />
                     <Textarea label="Описание" value={description} onChange={e => setDescription(e.target.value)} />
-                    <Input label="Дата и время" type="datetime-local" value={date} onChange={e => setDate(e.target.value)} />
+                    <Input
+                        label="Дата и время"
+                        type="datetime-local"
+                        value={date}
+                        onChange={e => setDate(e.target.value)}
+                    />
                     <Input label="Место проведения" value={location} onChange={e => setLocation(e.target.value)} />
                     <Input label="Адрес" value={address} onChange={e => setAddress(e.target.value)} />
-                    <Input label="Минимальная цена" type="number" value={minPrice.toString()} onChange={e => setMinPrice(Number(e.target.value))} />
+                    <Input
+                        label="Минимальная цена"
+                        type="number"
+                        value={minPrice.toString()}
+                        onChange={e => setMinPrice(Number(e.target.value))}
+                    />
 
                     <Select
                         label="Возрастное ограничение"

@@ -12,17 +12,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'GET') {
         const events = db.prepare('SELECT * FROM events ORDER BY datetime').all()
+        console.log(events)
         return res.status(200).json(events)
     }
 
     if (req.method === 'POST') {
-        const { title, description, date, location, address, ageLimit, minPrice, url } = req.body
+        const { title, description, datetime, location, address, ageLimit, minPrice, url } = req.body
 
         const result = db.prepare(`
       INSERT INTO events
       (title, description, datetime, location, address, ageLimit, minPrice, poster_url)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(title, description, date, location, address, ageLimit, minPrice, url)
+    `).run(title, description, datetime, location, address, ageLimit, minPrice, url)
 
         return res.status(201).json({ id: result.lastInsertRowid })
     }

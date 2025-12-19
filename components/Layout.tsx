@@ -18,7 +18,6 @@ export default function Layout({ children }: LayoutProps) {
                 <PrimaryButton onClick={logout}>Выйти</PrimaryButton>
             </header>
 
-            {/* Основной контент */}
             <main className="p-6">{children}</main>
         </div>
     );

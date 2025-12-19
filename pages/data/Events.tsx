@@ -3,13 +3,14 @@ import AdminLayout from '../../components/layout/AdminLayout'
 import Card from '../../components/cards/Card'
 import Button from '../../components/buttons/Button'
 import { useRouter } from 'next/router'
+import {formatEventDate} from "../../utils/format";
 
 type Event = {
     id: number
     title: string
     url: string
     description: string
-    date: string
+    datetime: string
     location: string
     address: string
     ageLimit: number
@@ -50,7 +51,10 @@ export default function HomePage() {
                     <div className="flex justify-between items-center">
                         <div>
                             <h2 className="font-semibold text-lg">{event.title}</h2>
-                            <p>{new Date(event.date).toLocaleString()}</p>
+                            <p>{event.datetime
+                                ? new Date(event.datetime).toLocaleDateString() + " | " +
+                                new Date(event.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                : "Дата не указана"} | {event.ageLimit ?? "0"}</p>
                             <p>{event.location}</p>
                         </div>
                         <div className="flex gap-2">

@@ -1,57 +1,3 @@
-// import type { NextApiRequest, NextApiResponse } from 'next'
-// import { db } from '../../../lib/db'
-//
-// export default function handler(req: NextApiRequest, res: NextApiResponse) {
-//     const id = Number(req.query.id)
-//
-//     if (req.method === 'DELETE') {
-//         db.prepare('DELETE FROM events WHERE id = ?').run(id)
-//         return res.status(204).end()
-//     }
-//
-//     if (req.method === 'PUT') {
-//         const {
-//             title,
-//             description,
-//             date,
-//             location,
-//             address,
-//             ageLimit,
-//             minPrice,
-//             status,
-//         } = req.body
-//
-//         db.prepare(`
-//       UPDATE events SET
-//         title = ?,
-//         description = ?,
-//         date = ?,
-//         location = ?,
-//         address = ?,
-//         ageLimit = ?,
-//         minPrice = ?,
-//         status = ?
-//       WHERE id = ?
-//     `).run(
-//             title,
-//             description,
-//             date,
-//             location,
-//             address,
-//             ageLimit,
-//             minPrice,
-//             status,
-//             id
-//         )
-//
-//         return res.status(200).json({ success: true })
-//     }
-//
-//     res.status(405).end()
-// }
-
-
-
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { db } from '../../../lib/db'
 
@@ -74,14 +20,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     if (req.method === 'PUT') {
         const { title, description, date, location, address, ageLimit, minPrice, status, url } = req.body
+
+        const datetime = date ? (date.includes('T') ? date : date + 'T00:00') : null
+
         const result = db.prepare(`
       UPDATE events
-      SET title = ?, description = ?, datetime = ?, location = ?, address = ?, ageLimit = ?, minPrice = ?, poster_url = ?
+      SET title = ?, description = ?, datetime = ?, location = ?, address = ?, ageLimit = ?, minPrice = ?, poster_url = ?, status = ?
       WHERE id = ?
-    `).run(title, description, date, location, address, ageLimit, minPrice, url, eventId)
+    `).run(title, description, datetime, location, address, ageLimit, minPrice, url, status, eventId)
+
         if (result.changes === 0) return res.status(404).json({ error: 'Event not found' })
         return res.status(200).json({ success: true })
     }
+
 
     if (req.method === 'DELETE') {
         const result = db.prepare('DELETE FROM events WHERE id = ?').run(eventId)

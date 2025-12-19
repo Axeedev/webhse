@@ -11,12 +11,13 @@ type Event = {
     id: number
     title: string
     description: string
-    date: string
+    datetime: string
     location: string
     address: string
     ageLimit: number
     minPrice: number
     status: string
+    poster_url: string | null
 }
 
 export default function EditEventPage() {
@@ -25,6 +26,7 @@ export default function EditEventPage() {
 
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
+    const [url, setUrl] = useState('')
     const [date, setDate] = useState('')
     const [location, setLocation] = useState('')
     const [address, setAddress] = useState('')
@@ -45,17 +47,21 @@ export default function EditEventPage() {
 
                 setTitle(e.title)
                 setDescription(e.description)
-                setDate(e.date)
+                setDate(e.datetime || '') // корректно устанавливаем дату
                 setLocation(e.location)
                 setAddress(e.address)
                 setAgeLimit(e.ageLimit)
                 setMinPrice(e.minPrice)
                 setStatus(e.status)
+                setUrl(e.poster_url || '')
                 setLoading(false)
             })
     }, [id])
 
     if (loading) return <AdminLayout><p>Загрузка...</p></AdminLayout>
+
+    // нормализуем дату для input type="datetime-local"
+    const normalizedDate = date ? (date.includes('T') ? date : date + 'T00:00') : ''
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -66,12 +72,13 @@ export default function EditEventPage() {
             body: JSON.stringify({
                 title,
                 description,
-                date,
+                datetime: normalizedDate, // поле совпадает с сервером
                 location,
                 address,
                 ageLimit: Number(ageLimit),
                 minPrice: Number(minPrice),
-                status,
+                poster_url: url,
+                status
             }),
         })
 
@@ -86,11 +93,21 @@ export default function EditEventPage() {
                 <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
                     <Input label="Название" value={title} onChange={e => setTitle(e.target.value)} />
                     <Textarea label="Описание" value={description} onChange={e => setDescription(e.target.value)} />
-                    <Input label="Дата и время" type="datetime-local" value={date} onChange={e => setDate(e.target.value)} />
+                    <Input label="Url изображения" value={url} onChange={e => setUrl(e.target.value)} />
+                    <Input
+                        label="Дата и время"
+                        type="datetime-local"
+                        value={normalizedDate}
+                        onChange={e => setDate(e.target.value)}
+                    />
                     <Input label="Место проведения" value={location} onChange={e => setLocation(e.target.value)} />
                     <Input label="Адрес" value={address} onChange={e => setAddress(e.target.value)} />
-                    <Input label="Минимальная цена" type="number" value={minPrice.toString()} onChange={e => setMinPrice(Number(e.target.value))} />
-
+                    <Input
+                        label="Минимальная цена"
+                        type="number"
+                        value={minPrice.toString()}
+                        onChange={e => setMinPrice(Number(e.target.value))}
+                    />
                     <Select
                         label="Возрастное ограничение"
                         value={ageLimit.toString()}
@@ -103,7 +120,6 @@ export default function EditEventPage() {
                             { value: '18', label: '18+' },
                         ]}
                     />
-
                     <Select
                         label="Статус"
                         value={status}
@@ -113,7 +129,6 @@ export default function EditEventPage() {
                             { value: 'closed', label: 'Закрыта' },
                         ]}
                     />
-
                     <Button type="submit" className="bg-blue-600 text-white">
                         Сохранить
                     </Button>
