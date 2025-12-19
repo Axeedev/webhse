@@ -12,6 +12,7 @@ export default function CreateEventPage() {
 
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
+    const [url, setUrl] = useState('')
     const [date, setDate] = useState('')
     const [location, setLocation] = useState('')
     const [address, setAddress] = useState('')
@@ -33,7 +34,7 @@ export default function CreateEventPage() {
                 address,
                 ageLimit: Number(ageLimit),
                 minPrice: Number(minPrice),
-                status,
+                url: url
             }),
         })
 
@@ -47,6 +48,7 @@ export default function CreateEventPage() {
                 <h2 className="text-xl font-semibold mb-6">Создать новое мероприятие</h2>
                 <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
                     <Input label="Название" value={title} onChange={e => setTitle(e.target.value)} />
+                    <Input label="Url изображения" value={url} onChange={e => setUrl(e.target.value)} />
                     <Textarea label="Описание" value={description} onChange={e => setDescription(e.target.value)} />
                     <Input label="Дата и время" type="datetime-local" value={date} onChange={e => setDate(e.target.value)} />
                     <Input label="Место проведения" value={location} onChange={e => setLocation(e.target.value)} />

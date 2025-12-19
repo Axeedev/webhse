@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 type Event = {
     id: number
     title: string
+    url: string
     description: string
     date: string
     location: string

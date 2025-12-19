@@ -73,12 +73,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (req.method === 'PUT') {
-        const { title, description, date, location, address, ageLimit, minPrice, status } = req.body
+        const { title, description, date, location, address, ageLimit, minPrice, status, url } = req.body
         const result = db.prepare(`
       UPDATE events
-      SET title = ?, description = ?, date = ?, location = ?, address = ?, ageLimit = ?, minPrice = ?, status = ?
+      SET title = ?, description = ?, datetime = ?, location = ?, address = ?, ageLimit = ?, minPrice = ?, poster_url = ?
       WHERE id = ?
-    `).run(title, description, date, location, address, ageLimit, minPrice, status, eventId)
+    `).run(title, description, date, location, address, ageLimit, minPrice, url, eventId)
         if (result.changes === 0) return res.status(404).json({ error: 'Event not found' })
         return res.status(200).json({ success: true })
     }

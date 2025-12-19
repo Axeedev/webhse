@@ -4,21 +4,25 @@ import { runMiddleware } from '../mycors'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // подключаем CORS
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001')
+    res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,DELETE,OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
     await runMiddleware(req, res, (req, res, next) => next())
 
     if (req.method === 'GET') {
-        const events = db.prepare('SELECT * FROM events ORDER BY date').all()
+        const events = db.prepare('SELECT * FROM events ORDER BY datetime').all()
         return res.status(200).json(events)
     }
 
     if (req.method === 'POST') {
-        const { title, description, date, location, address, ageLimit, minPrice, status } = req.body
+        const { title, description, date, location, address, ageLimit, minPrice, url } = req.body
 
         const result = db.prepare(`
       INSERT INTO events
-      (title, description, date, location, address, ageLimit, minPrice, status)
+      (title, description, datetime, location, address, ageLimit, minPrice, poster_url)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(title, description, date, location, address, ageLimit, minPrice, status)
+    `).run(title, description, date, location, address, ageLimit, minPrice, url)
 
         return res.status(201).json({ id: result.lastInsertRowid })
     }
