@@ -17,3 +17,28 @@ db.prepare(`
                                     poster_url TEXT
   )
 `).run()
+
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    email TEXT UNIQUE,
+    role TEXT DEFAULT 'admin',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`).run()
+
+
+const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get();
+if (userCount && typeof userCount === 'object' && 'count' in userCount) {
+  if (Number(userCount.count) === 0) {
+  const bcrypt = require('bcryptjs');
+  const hashedPassword = bcrypt.hashSync('admin123', 10);
+  
+  db.prepare(`
+    INSERT INTO users (username, password_hash, email, role) 
+    VALUES (?, ?, ?, ?)
+  `).run('admin', hashedPassword, 'admin@admin.com', 'admin');
+  }
+}
